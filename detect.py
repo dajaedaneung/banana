@@ -74,7 +74,7 @@ def run(
         name='exp',  # save results to project/name
         exist_ok=False,  # existing project/name ok, do not increment
         line_thickness=3,  # bounding box thickness (pixels)
-        hide_labels=False,  # hide labels
+        hide_labels=True,  # hide labels
         hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
@@ -165,7 +165,7 @@ def run(
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
                         with open(f'{txt_path}.txt', 'a') as f:
-                            f.write(('%g ' * len(line)).rstrip() % line + '\n')
+                            f.write(('%g jjj' * len(line)).rstrip() % line + '\n')
 
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
@@ -183,6 +183,7 @@ def run(
                     cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  # 1 millisecond
+
 
             # Save results (image with detections)
             if save_img:
@@ -204,9 +205,13 @@ def run(
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
+        
+        # len(det) 사람 객채 수
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
 
-    # Print results
+        a = len(det)
+        print(a)
+    # Print resultsq
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
     if save_txt or save_img:
