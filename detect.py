@@ -218,7 +218,7 @@ def run(
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
-        
+
         # len(det) 사람 객채 수
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
         LOGGER.info(f'사람 수는 {people}명 ㅋㅋ')
@@ -229,6 +229,9 @@ def run(
             sendData(people)
             LOGGER.info('🤖 =======================> 데이터 전송!!')
             start = None
+
+        # 사람이 한 명도 없을 떄, 이전 값 전송 방지
+        people = 0
 
     # Print resultsq
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
