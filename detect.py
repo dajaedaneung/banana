@@ -119,6 +119,7 @@ def run(
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
 
     start = None
+    people = 0
 
     for path, im, im0s, vid_cap, s in dataset:
         if start is None: start = time.time()
@@ -166,6 +167,10 @@ def run(
                 for c in det[:, 5].unique():
                     n = (det[:, 5] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+
+                    # 사람이면 people 에 값 저장
+                    if names[int(c)] == 'person':
+                        people = n
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
@@ -216,7 +221,7 @@ def run(
         
         # len(det) 사람 객채 수
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
-        people = len(det)
+        LOGGER.info(f'사람 수는 {people}명 ㅋㅋ')
 
         # 1분마다 한 번씩 데이터 전송
         end = time.time()
