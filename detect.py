@@ -32,9 +32,12 @@ import argparse
 import os
 import platform
 import sys
+import time
 from pathlib import Path
 
 import torch
+
+from send import sendData
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -114,7 +117,12 @@ def run(
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
+
+    start = None
+
     for path, im, im0s, vid_cap, s in dataset:
+        if start is None: start = time.time()
+
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
@@ -208,9 +216,15 @@ def run(
         
         # len(det) 사람 객채 수
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
+        people = len(det)
 
-        a = len(det)
-        print(a)
+        # 1분마다 한 번씩 데이터 전송
+        end = time.time()
+        if end - start > 60:
+            sendData(people)
+            LOGGER.info('🤖 =======================> 데이터 전송!!')
+            start = None
+
     # Print resultsq
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
